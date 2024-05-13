@@ -1,3 +1,6 @@
+//codigo criado por Guilherme Andrade no inicio do projeto do Genius, focado em criar a funcao piscar_led ara acender os leds selecionados e configurar o ambiente com o setup e o loop
+
+
 int max_pontos= 10;
 int botoes[4] = { 4, 3, 2, 1 };
 int leds[4] = { 9, 8, 7, 6 };
