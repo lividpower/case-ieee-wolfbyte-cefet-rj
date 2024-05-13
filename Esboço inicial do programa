@@ -1,0 +1,51 @@
+int estado_botao1, estado_botao2, estado_botao3, estado_botao4;
+const int botao1 = 2, botao2 = 3, botao3 = 4, botao4 = 5, ledVerde = 8, ledAmarela = 9, ledLaranja = 6, ledAzul = 7;
+void setup()
+{
+  pinMode(botao1, INPUT);
+  pinMode(botao2, INPUT);
+  pinMode(botao3, INPUT);
+  pinMode(botao4, INPUT);
+  pinMode(ledAzul, OUTPUT);
+  pinMode(ledLaranja, OUTPUT);
+  pinMode(ledVerde, OUTPUT);
+  pinMode(ledAmarela, OUTPUT);
+}
+void loop()
+{//qual a diferença de usar somente if ou if else???
+ //os botões não estão funcionando corretamente!!!
+  //necessário gerar um acendimento aleatório dos leds!!!
+  //é necessário registrar o click dos botões para conseguir registrar a tentativa do usuário em acertar a sequÊncia de leds acionados!!
+  estado_botao1 = digitalRead(botao1);
+  estado_botao2 = digitalRead(botao2);
+  estado_botao3 = digitalRead(botao3);
+  estado_botao4 = digitalRead(botao4);
+  if(estado_botao1 == HIGH)
+  {
+  	digitalWrite(ledLaranja, HIGH);
+    digitalWrite(ledVerde, LOW);
+    digitalWrite(ledAmarela, LOW);
+    digitalWrite(ledAzul, LOW);
+  }
+  else if(estado_botao2 == HIGH)
+  {
+  	digitalWrite(ledLaranja, LOW);
+    digitalWrite(ledVerde, LOW);
+    digitalWrite(ledAmarela, LOW);
+    digitalWrite(ledAzul, HIGH);
+  }
+  else if(estado_botao3 == HIGH)
+  {
+  	digitalWrite(ledLaranja, LOW);
+    digitalWrite(ledVerde, HIGH);
+    digitalWrite(ledAmarela, LOW);
+    digitalWrite(ledAzul, LOW);
+  }
+  else if(estado_botao4 == HIGH)
+  {
+  	digitalWrite(ledLaranja, LOW);
+    digitalWrite(ledVerde, LOW);
+    digitalWrite(ledAmarela, HIGH);
+    digitalWrite(ledAzul, LOW);
+  }
+}
