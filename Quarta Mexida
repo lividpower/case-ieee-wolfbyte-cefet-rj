@@ -1,0 +1,96 @@
+//Autor: Guilherme Andrade 
+//Codigo final. alteracao na funcao verificacao e sua logica e na funcao btn_pressionado por erros durante a execucao, criacao de um ponteiro para faclitar a inserção de valores durante o programa 
+
+const int max_pontos = 10;
+int botoes[4] = { 4, 3, 2, 1 };
+int leds[4] = { 9, 8, 7, 6 };
+int nivel = 0;
+int sequencia[max_pontos] = {};
+int sequencia_jogador[max_pontos];
+bool gameOver = false;
+int jogada = 0;
+int* ponteiro_pressionado;
+
+bool verificacao() {
+  int resultado;
+  resultado = *ponteiro_pressionado;
+  if (sequencia[jogada] != resultado) {
+    //perdeu
+    for (int i = 0; i <= 3; i++) {
+      digitalWrite(leds[i], HIGH);
+      delay(100);
+      digitalWrite(leds[i], LOW);
+    }
+    return gameOver = true;
+  }
+}
+
+  void nivel_seguinte() {
+    int aleatorio = random(4);
+    sequencia[nivel] = aleatorio;
+    nivel++;
+  }
+
+  void btn_pressionado() {
+    int pressionado = 0;
+
+
+    for (int i = 0; i < nivel; i++) {
+      bool aux = false;
+      while (!aux) {
+        for (int i = 0; i <= 3; i++) {
+          if (digitalRead(botoes[i]) == HIGH) {
+            pressionado = i;
+            // da pra colocar uma musica pra cada botao aqui
+            digitalWrite(leds[i], HIGH);
+            delay(300);
+            digitalWrite(leds[i], LOW);
+            aux = true;
+          }
+        }
+      }
+      ponteiro_pressionado = &pressionado;
+      verificacao();
+    
+    jogada++;
+  }
+  jogada = 0;
+}
+  
+
+
+
+void piscar_led() {
+  for (int i = 0; i < nivel; i++) {
+    digitalWrite(leds[sequencia[i]], HIGH);
+    delay(500);
+    digitalWrite(leds[sequencia[i]], LOW);
+    delay(100);
+  }
+}
+
+void setup() {
+  pinMode(6, OUTPUT);
+  pinMode(7, OUTPUT);
+  pinMode(8, OUTPUT);
+  pinMode(9, OUTPUT);
+  pinMode(4, INPUT);
+  pinMode(3, INPUT);
+  pinMode(2, INPUT);
+  pinMode(1, INPUT);
+  randomSeed(analogRead(A0));
+}
+
+void loop() {
+
+  nivel_seguinte();
+  piscar_led();
+  btn_pressionado();
+  if (gameOver == true) {
+    sequencia[max_pontos] = {};
+    nivel = 0;
+    jogada = 0;
+    gameOver = 0;
+  }
+  delay(1000);
+}
