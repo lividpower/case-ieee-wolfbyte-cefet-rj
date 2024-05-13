@@ -1,0 +1,156 @@
+//declaração das variáveis globais do programa
+const int max_pontos = 100; //número máximo de rodadas sendo igual a 10 (NECESSÁRIO PENSAR EM UM SISTEMA PARA CASO O JOGADOR CHEGUE ATÉ O FINAL DOS NÍVEIS)	
+int notas[4] = {262,294,330,349}; //notas musicais que serão utilizadas durante o acionamento dos leds e botões
+int botoes[4] = { 4, 3, 2, 1 };
+int leds[4] = { 9, 8, 7, 6 };
+int nivel = 0;
+int sequencia[max_pontos] = {}; //esse array terá o tamanho referente ao número máximo de níveis
+int sequencia_jogador[max_pontos]; //esse array terá o tamanho referente ao número máximo de níveis
+bool gameOver = false;
+int jogada = 0;
+int* ponteiro_pressionado;
+int inicio = 0;
+
+
+
+void aperta_comeco() //função que permite o reinício do jogo de forma correta
+{
+  bool teste = false;
+  while(!teste)
+  {
+    for(int i = 0; i <= 3; i++)
+    {
+      if(digitalRead(botoes[i]) == HIGH){
+        	teste = true;
+      }
+    }
+  }
+}
+
+
+
+bool verificacao() //verifica se o jogador inseriu corretamente a sequência de leds acesos
+{
+  int resultado;
+  resultado = *ponteiro_pressionado; //recebe o botão que foi pressionado pelo jogador
+  if(sequencia[jogada] != resultado) //compara jogada a jogada se o jogador errou a sequência de leds
+  {
+    //nesse caso, o jogador terá errado a sequência
+    for(int i = 0; i <= 3; i++) 
+    {
+      digitalWrite(leds[i], HIGH);
+      tone(10,70);
+      delay(100);
+      digitalWrite(leds[i], LOW);
+      noTone(10);
+    }
+    gameOver = true; //o jogador errou, portanto, game over!
+  }
+}
+
+
+
+void nivel_seguinte() //caso o jogador não cometa nenhum erro, a função irá passar para o nível seguinte
+{
+    int aleatorio = random(4); //sorteio das posições do array de led
+    sequencia[nivel] = aleatorio; //esse led sorteado será atribuído para cada nivel que for sendo alcançado
+    nivel++; 
+}
+
+
+
+void btn_pressionado() //verifica qual botão que foi pressionado pelo jogador 
+{
+  	int pressionado; //variável que indica a posição do botão pressionado dendo array de botões
+    for(int i = 0; i < nivel; i++) 
+    {
+      bool aux = false;
+      while(!aux) //looping infinito, processando o aperto de um botão
+      {
+        for(int i = 0; i <= 3; i++) 
+        {
+          if(digitalRead(botoes[i]) == HIGH) //verificando se o botão foi pressionado
+          { 
+            pressionado = i;
+            digitalWrite(leds[i], HIGH); //quando for apertado o botão, o led referente ao botão será aceso
+            delay(18); //delay para evitar que uma nota musical se sobressaia sobre a outra
+            tone(10,notas[i]);
+            delay(300);
+            digitalWrite(leds[i], LOW);
+            noTone(10);
+            aux = true; //condição de saída desse looping
+          }
+        }
+      }
+      ponteiro_pressionado = &pressionado; 
+      verificacao(); 
+      jogada++; 
+    }
+  	jogada = 0;
+}
+  
+
+
+void piscar_led() //acendimento dos leds que forem sorteados
+{
+  for(int i = 0; i < nivel; i++) 
+  {
+    digitalWrite(leds[sequencia[i]], HIGH); //acendimento do led
+    tone(10,notas[sequencia[i]]); //irá emitir um som com a nota musical referente ao led que foi acesso
+    delay(500); //delay para que seja notório o acendimento do led, atrasando o seu desligamento
+    digitalWrite(leds[sequencia[i]], LOW);
+    noTone(10); //encerra a emissão do som
+    delay(100); //atrasa o acendimento do próximo led
+  }
+}
+
+        
+           
+void setup() //declaração dos pinos do ARDUINO
+{
+  pinMode(10, OUTPUT); //buzzer
+  pinMode(6, OUTPUT); //led amarelo
+  pinMode(7, OUTPUT); //led verde
+  pinMode(8, OUTPUT); //led azul
+  pinMode(9, OUTPUT); //led vermelho
+  pinMode(4, INPUT); //botão vermelho
+  pinMode(3, INPUT); //botão azul
+  pinMode(2, INPUT); //botão verde 
+  pinMode(1, INPUT); //boão amarelo
+  randomSeed(analogRead(A0)); //geração de uma semente randômica para evitar que o jogo reinicia de forma padronizada
+}
+
+           
+           
+void loop() // execução em looping
+{
+  aperta_comeco(); 
+  nivel_seguinte(); 
+  piscar_led();
+  btn_pressionado();
+  if(nivel == 100) //se o jogador chegar no último nível, 
+  {
+    for(int i = 0; i<=3; i++)
+    {
+      digitalWrite(leds[i],HIGH);
+      delay(100);
+      digitalWrite(leds[i],LOW);
+    }
+    gameOver = true;
+  }
+  if(gameOver == true) 
+  {
+    sequencia[max_pontos] = {}; //zerando as variáveis para que o jogador possa reiniciar o jogo
+    nivel = 0;
+    jogada = 0;
+    gameOver = false;
+    inicio = 0;
+    delay(2000); //delay para o inicío do próximo jogo
+    aperta_comeco(); //reinício automático do jogo
+    nivel_seguinte();
+  	piscar_led();
+  	btn_pressionado();
+  }
+  delay(2000); //delay para o inicío do próximo jogo
+}
+//tentar pensar em um MENU para inciar e reiniciar o jogo, ao invés de deixar o jogo reiniciar automaticamente
