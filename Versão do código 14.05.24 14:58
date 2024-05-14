@@ -1,0 +1,193 @@
+//Declaração das variáveis globais do programa
+#include <LiquidCrystal_I2C.h>
+LiquidCrystal_I2C lcd(39, 16, 2); //declaração do lcd(16x2) conectaddo ao endereço 39
+const int max_pontos = 10; //número máximo de rodadas = 100
+int notas[4] = {262, 294, 330, 349}; // Notas musicais que serão utilizadas para o acionamento dos botões
+int botoes[4] = {4, 3, 2, 1};
+int leds[4] = {9, 8, 7, 6};
+int nivel = 0;
+int sequencia[max_pontos] = {};
+int sequencia_jogador[max_pontos];
+bool gameOver = false, gameWin = false;
+int jogada = 0;
+int* ponteiro_pressionado;
+int inicio = 0;
+ 
+bool verificacao() 
+{
+    int resultado;
+    resultado = *ponteiro_pressionado;
+    if (sequencia[jogada] != resultado) 
+    {
+        // Perdeu
+        for (int i = 0; i <= 3; i++) 
+        {
+            digitalWrite(leds[i], HIGH);
+            tone(10, 70);
+            delay(100);
+            digitalWrite(leds[i], LOW);
+            noTone(10);
+        }
+        return gameOver = true;
+    }
+    return false;
+}
+
+void nivel_seguinte() 
+{
+    int aleatorio = random(4);
+    sequencia[nivel] = aleatorio;
+    nivel++;
+}
+
+void btn_pressionado() 
+{
+    int pressionado = 0;
+    for (int i = 0; i < nivel; i++) 
+    {
+        bool aux = false;
+        while (!aux) 
+        {
+            for (int i = 0; i <= 3; i++) 
+            {
+                if (digitalRead(botoes[i]) == HIGH) 
+                {
+                    pressionado = i;
+                    digitalWrite(leds[i], HIGH);
+                    delay(18);
+                    tone(10, notas[i]);
+                    delay(300);
+                    digitalWrite(leds[i], LOW);
+                    noTone(10);
+                    aux = true;
+                }
+            }
+        }
+        ponteiro_pressionado = &pressionado;
+        if (verificacao())
+            break;
+        jogada++;
+    }
+    jogada = 0;
+}
+
+void piscar_led() 
+{
+    for (int i = 0; i < nivel; i++) 
+    {
+        digitalWrite(leds[sequencia[i]], HIGH);
+        tone(10, notas[sequencia[i]]);
+        delay(500);
+        digitalWrite(leds[sequencia[i]], LOW);
+        noTone(10);
+        delay(100);
+    }
+}
+
+void setup() // Declaração dos pinos do ARDUINO
+{
+  	lcd.init(); //incialização do lcd
+    lcd.backlight(); //acendendo a luz de fundo do lcd
+    pinMode(10, OUTPUT); // Buzzer
+    pinMode(6, OUTPUT); // Led amarelo
+    pinMode(7, OUTPUT); // Led verde
+    pinMode(8, OUTPUT); // Led azul
+    pinMode(9, OUTPUT); // Led vermelho
+    pinMode(4, INPUT); // Botão vermelho
+    pinMode(3, INPUT); // Botão azul
+    pinMode(2, INPUT); // Botão verde
+    pinMode(1, INPUT); // Botão amarelo
+    randomSeed(analogRead(A0)); // Geração de uma semente randômica para evitar que o jogo reinicia de forma padronizada
+}
+
+void loop() 
+{ 
+  lcd.clear();
+  if(nivel == 0)
+  {
+	lcd.setCursor(0,0);
+    lcd.print("INICIANDO JOGO");
+    lcd.setCursor(0,1);
+    lcd.print("EM:");
+    delay(2000);
+    lcd.clear();
+    lcd.print("5 SEGUNDOS");
+    delay(1000); 
+    lcd.clear();
+    lcd.print("4 SEGUNDOS");
+    delay(1000); 
+    lcd.clear();
+    lcd.print("3 SEGUNDOS");
+    delay(1000); 
+    lcd.clear();
+    lcd.print("2 SEGUNDOS");
+    delay(1000); 
+    lcd.clear();
+    lcd.print("1 SEGUNDO");
+    delay(1000);
+    lcd.clear();
+  }
+  lcd.print("NIVEL");
+  lcd.setCursor(6,0);
+  lcd.print(nivel + 1);
+  nivel_seguinte();
+  piscar_led();
+  btn_pressionado();
+  if(nivel == max_pontos) //se o jogador chegar no último nível, ele terá zerado o jogo
+  {
+    for(int i = 0; i<=3; i++)
+    {
+      digitalWrite(leds[i],HIGH);
+      delay(100);
+      digitalWrite(leds[i],LOW);
+    }
+    gameOver = true;
+    gameWin = true; //verificação para caso o jogador tenha zerado o jogo
+  }
+  if (gameOver == true) 
+  { //caso existisse um menu, ele teria que ser inserido a partir daqui...
+   	lcd.setCursor(0,0);
+    if(!gameWin) //se o jogador tiver zerado o jogo, irá pular essa parte...
+    {
+    	lcd.print("GAME OVER!");
+    	delay(3000);
+    	lcd.clear(); 
+    }
+    else
+    {
+    	lcd.print("VICTORY!");
+      	delay(3000);
+      	lcd.clear();
+    }
+    sequencia[max_pontos] = {};
+    nivel = 0;
+    jogada = 0;
+    gameOver = false;
+    inicio = 0;
+    lcd.print("REINICIANDO EM:");
+    delay(2000);
+    lcd.clear();
+    lcd.print("5 SEGUNDOS");
+    delay(1000); 
+    lcd.clear();
+    lcd.print("4 SEGUNDOS");
+    delay(1000); 
+    lcd.clear();
+    lcd.print("3 SEGUNDOS");
+    delay(1000); 
+    lcd.clear();
+    lcd.print("2 SEGUNDOS");
+    delay(1000); 
+    lcd.clear();
+    lcd.print("1 SEGUNDO");
+    delay(1000);
+    lcd.clear();
+  }
+  else
+  {
+    delay(1000);
+  }
+}
+
+//colocar os recordes enquanto o jogador for jogando 
+//tentar pensar em um MENU para inciar e reiniciar o jogo, ao invés de deixar o jogo reiniciar automaticamente
