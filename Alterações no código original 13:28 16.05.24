@@ -10,7 +10,8 @@ int nivel = 0;
 int sequencia[max_pontos] = {}; //usado para armazenar a sequência de acendimento dos leds
 bool gameOver = false; //usada para verificar a ocorrência do Game Over 
 bool gameWin = false; //usada para conseguir diferenciar o Game Over de uma vitória do jogador
-int recorde = 0;
+int recorde_atual = 0; //recorde do jogador que será comparado ao recorde fixo
+int recorde_fixo = 0; //recorde que será salvo mesmo após o desligamento do led
 int rodada = 0; //usado para identificar a primeira rodada, quando for printado o início do jogo
 int* ponteiro_pressionado;
 int inicio = 0;
@@ -20,7 +21,7 @@ bool verificacao() //verifica se o jogador inseriu corretamente a sequência de 
 {
     int resultado;
     resultado = *ponteiro_pressionado; //recebe o botão que foi pressionado pelo jogador
-    if (sequencia[recorde] != resultado) //compara jogada a jogada se o jogador errou a sequência de leds
+    if (sequencia[jogada] != resultado) //compara jogada a jogada se o jogador errou a sequência de leds
     {
         //nesse caso, o jogador terá errado a sequência
         for (int i = 0; i <= 3; i++) 
@@ -42,6 +43,7 @@ void nivel_seguinte() //caso o jogador não cometa nenhum erro, a função irá 
     int aleatorio = random(4); //sorteio do led que será aceso
     sequencia[nivel] = aleatorio; //esse led sorteado será atribuído para cada nivel que for sendo alcançado, formando uma sequência
     nivel++;
+  	recorde_atual++;
 }
 
 
@@ -71,8 +73,9 @@ void btn_pressionado() //verifica qual botão que foi pressionado pelo jogador
         ponteiro_pressionado = &pressionado;
         if (verificacao())
             break;
-        recorde++; //irá contabilizar o acerto a cada nível
-    }
+        jogada++; 
+    } 
+ 	jogada = 0; //a cada nível essa variável é zerada
 }
 
 
@@ -170,8 +173,8 @@ void loop() // execução em looping
     nivel = 0; 
     gameOver = false;
     inicio = 0;
-    recorde = 0;
-    rodada = -1;
+    jogada = 0;
+    rodada = 0;
     lcd.print("REINICIANDO JOGO");
     lcd.setCursor(0,1);
     lcd.print("EM:");
