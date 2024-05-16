@@ -12,6 +12,7 @@ bool gameOver = false; //usada para verificar a ocorrência do Game Over
 bool gameWin = false; //usada para conseguir diferenciar o Game Over de uma vitória do jogador
 int recorde_atual = 0; //recorde do jogador que será comparado ao recorde fixo
 int recorde_fixo = 0; //recorde que será salvo mesmo após o desligamento do led
+int endereco = 0; //endereço onde será armazenado o valor do recorde na memória do microcontrolador
 int rodada = 0; //usado para identificar a primeira rodada, quando for printado o início do jogo
 int* ponteiro_pressionado;
 int inicio = 0;
@@ -112,6 +113,7 @@ void setup() // Declaração dos pinos do ARDUINO
 
 void loop() // execução em looping
 { 
+  EEPROM.get(endereco,); //retirando o valor do recorde da memória
   lcd.clear();
   if(nivel == 0 && rodada == 0)
   {
@@ -136,6 +138,11 @@ void loop() // execução em looping
     lcd.print("1 SEGUNDO");
     delay(1000);
     lcd.clear();
+  }
+   if(recorde_fixo <= recorde_atual)
+  {
+  	EEPROM.put(endereco, recorde_atual); //inserindo o valor do recorde na memória
+    recorde_fixo = recorde_atual;
   }
   lcd.print("NIVEL:");
   lcd.setCursor(6,0); 
@@ -195,9 +202,11 @@ void loop() // execução em looping
     lcd.print("1 SEGUNDO");
   }
   //inserir o salvamento do recorde na memória
+  EEPROM.put(endereco, recorde_fixo); //inserindo o valor do recorde na memória
   delay(1000);
 }
 
 //colocar os recordes enquanto o jogador for jogando 
 //fixar valor do recorde mesmo após o desligamento do ARDUINO
+//tentar pensar em um MENU para inciar e reiniciar o jogo, ao invés de deixar o jogo reiniciar automaticamente
 //tentar pensar em um MENU para inciar e reiniciar o jogo, ao invés de deixar o jogo reiniciar automaticamente
